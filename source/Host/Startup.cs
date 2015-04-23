@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+using System.Collections.Generic;
+
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Facebook;
 using Microsoft.Owin.Security.Google;
@@ -26,6 +28,9 @@ using Thinktecture.IdentityServer.Core.Logging;
 using Thinktecture.IdentityServer.Core.Services;
 using Thinktecture.IdentityServer.Host;
 using Thinktecture.IdentityServer.Host.Config;
+using Thinktecture.IdentityServer.WsFederation.Configuration;
+using Thinktecture.IdentityServer.WsFederation.Models;
+using Thinktecture.IdentityServer.WsFederation.Services;
 
 [assembly: OwinStartup("LocalTest", typeof(Startup_LocalTest))]
 
@@ -40,12 +45,12 @@ namespace Thinktecture.IdentityServer.Host
 
             // uncomment to enable HSTS headers for the host
             // see: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
-            //app.UseHsts();
+            app.UseHsts();
 
             app.Map("/core", coreApp =>
                 {
                     var factory = InMemoryFactory.Create(
-                        users:   Users.Get(),
+                        users:   Users.Get(),                      
                         clients: Clients.Get(),
                         scopes:  Scopes.Get());
 
@@ -82,10 +87,30 @@ namespace Thinktecture.IdentityServer.Host
                             RaiseSuccessEvents = true,
                             RaiseErrorEvents = true
                         }
+                        ,
+
+                        PluginConfiguration = ConfigureWsFederation,
                     };
 
                     coreApp.UseIdentityServer(idsrvOptions);
                 });
+        }
+
+        private void ConfigureWsFederation(IAppBuilder pluginApp, IdentityServerOptions options)
+        {
+            var factory = new WsFederationServiceFactory(options.Factory);
+
+            // data sources for in-memory services
+            factory.Register(new Registration<IEnumerable<RelyingParty>>(RelyingParties.Get()));
+            factory.RelyingPartyService = new Registration<IRelyingPartyService>(typeof(InMemoryRelyingPartyService));
+
+            var wsFedOptions = new WsFederationPluginOptions
+            {
+                IdentityServerOptions = options,
+                Factory = factory
+            };
+
+            pluginApp.UseWsFederationPlugin(wsFedOptions);
         }
 
         public static void ConfigureIdentityProviders(IAppBuilder app, string signInAsType)
@@ -129,7 +154,8 @@ namespace Thinktecture.IdentityServer.Host
                 Caption = "ADFS",
                 SignInAsAuthenticationType = signInAsType,
 
-                MetadataAddress = "https://adfs.leastprivilege.vm/federationmetadata/2007-06/federationmetadata.xml",
+                //MetadataAddress = "https://adfs.leastprivilege.vm/federationmetadata/2007-06/federationmetadata.xml",
+                MetadataAddress = "https://login.microsoftonline.com/70248591-7dbf-4c5c-a3e3-0a009f207bb2/federationmetadata/2007-06/federationmetadata.xml",
                 Wtrealm = "urn:idsrv3"
             };
             app.UseWsFederationAuthentication(adfs);
@@ -140,8 +166,8 @@ namespace Thinktecture.IdentityServer.Host
                 Caption = "Azure AD",
                 SignInAsAuthenticationType = signInAsType,
 
-                Authority = "https://login.windows.net/4ca9cb4c-5e5f-4be9-b700-c532992a3705",
-                ClientId = "65bbbda8-8b85-4c9d-81e9-1502330aacba",
+                Authority = "https://login.microsoftonline.com/70248591-7dbf-4c5c-a3e3-0a009f207bb2/",
+                ClientId = "aab7506b-ca18-4e08-a2e1-f202549e111f",
                 RedirectUri = "https://localhost:44333/core/aadcb"
             };
 

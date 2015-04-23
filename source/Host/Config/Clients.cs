@@ -107,9 +107,9 @@ namespace Thinktecture.IdentityServer.Host.Config
                         "http://localhost:21575/index.html"
                     },
 
-                    AllowedCorsOrigins = new List<string>{
-                        "http://localhost:21575"
-                    },
+//                    AllowedCorsOrigins = new List<string>{
+//                        "http://localhost:21575"
+//                    },
                     
                     IdentityTokenLifetime = 360,
                     AccessTokenLifetime = 3600
