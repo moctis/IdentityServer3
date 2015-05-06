@@ -142,13 +142,23 @@ namespace Thinktecture.IdentityServer.Core.Services.InMemory
                 from u in _users
                 where u.Subject == subject.GetSubjectId()
                 select u;
-            var user = query.Single();
+            var user = query.SingleOrDefault();
 
-            var claims = new List<Claim>{
-                new Claim(Constants.ClaimTypes.Subject, user.Subject),
-            };
+            List<Claim> claims = new List<Claim>();
 
-            claims.AddRange(user.Claims);
+            if (user != null)
+            {
+                claims = new List<Claim>
+                {
+                    new Claim(Constants.ClaimTypes.Subject, user.Subject),
+                };
+                claims.AddRange(user.Claims);
+            }
+            else
+            {
+                claims.AddRange(subject.Claims);
+            }
+            
             if (requestedClaimTypes != null)
             {
                 claims = claims.Where(x => requestedClaimTypes.Contains(x.Type)).ToList();

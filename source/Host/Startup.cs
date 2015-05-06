@@ -41,7 +41,7 @@ namespace Thinktecture.IdentityServer.Host
         public void Configuration(IAppBuilder app)
         {
             LogProvider.SetCurrentLogProvider(new DiagnosticsTraceLogProvider());
-            //LogProvider.SetCurrentLogProvider(new TraceSourceLogProvider());
+            LogProvider.SetCurrentLogProvider(new TraceSourceLogProvider());
 
             // uncomment to enable HSTS headers for the host
             // see: https://developer.mozilla.org/en-US/docs/Web/Security/HTTP_strict_transport_security
@@ -49,10 +49,11 @@ namespace Thinktecture.IdentityServer.Host
 
             app.Map("/core", coreApp =>
                 {
-                    var factory = InMemoryFactory.Create(
-                        users:   Users.Get(),                      
-                        clients: Clients.Get(),
-                        scopes:  Scopes.Get());
+                    //var factory = InMemoryFactory.Create(
+                    //    users:   Users.Get(),                      
+                    //    clients: Clients.Get(),
+                    //    scopes:  Scopes.Get());
+                    var factory = Factory.Configure("IdSvr3Config");
 
                     factory.CustomGrantValidator = 
                         new Registration<ICustomGrantValidator>(typeof(CustomGrantValidator));
@@ -109,9 +110,11 @@ namespace Thinktecture.IdentityServer.Host
                 IdentityServerOptions = options,
                 Factory = factory
             };
+            wsFedOptions.EnableMetadataEndpoint = true;
 
             pluginApp.UseWsFederationPlugin(wsFedOptions);
         }
+         
 
         public static void ConfigureIdentityProviders(IAppBuilder app, string signInAsType)
         {
@@ -173,5 +176,6 @@ namespace Thinktecture.IdentityServer.Host
 
             app.UseOpenIdConnectAuthentication(aad);
         }
+
     }
 }

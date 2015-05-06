@@ -199,7 +199,16 @@ namespace Thinktecture.IdentityServer.Host.Config
 
                     Flow = Flows.Custom
                 },
-
+                new Client{
+                    ClientId = "idmgr_client",
+                    ClientName = "Identity Manager",
+                    Enabled = true,
+                    Flow = Flows.Implicit,
+                    RequireConsent = false,
+                    RedirectUris = new List<string>{
+                        "https://localhost:44337/idm",
+                    },  
+                },
                 new Client
                 {
                     ClientName = "Resource Owner Flow Client",
