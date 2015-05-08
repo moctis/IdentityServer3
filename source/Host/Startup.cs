@@ -170,8 +170,8 @@ namespace Thinktecture.IdentityServer.Host
                 SignInAsAuthenticationType = signInAsType,
 
                 Authority = "https://login.microsoftonline.com/70248591-7dbf-4c5c-a3e3-0a009f207bb2/",
-                ClientId = "aab7506b-ca18-4e08-a2e1-f202549e111f",
-                RedirectUri = "https://localhost:44333/core/aadcb"
+                ClientId = "8e3c3b47-a9b4-4525-8bc3-2bb64630fc61",
+                RedirectUri = "https://openid-draycir.azurewebsites.net/core/aadcb"
             };
 
             app.UseOpenIdConnectAuthentication(aad);
